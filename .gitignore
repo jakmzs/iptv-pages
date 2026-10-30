@@ -1,0 +1,5 @@
+# 生成物，不入库
+output/
+site/
+*.log
+__pycache__/
