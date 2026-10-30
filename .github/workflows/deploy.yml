@@ -42,12 +42,12 @@ jobs:
         if: always()
         run: docker stop iptv || true
 
-      - name: 准备站点目录
+      - name: 准备站点目录（含 M3U 兜底转换）
         run: |
           mkdir -p site
-          cp output/result.m3u site/ 2>/dev/null || true
           cp output/result.txt site/ 2>/dev/null || true
           cp output/epg.xml  site/ 2>/dev/null || true
+          python3 scripts/mk_m3u.py
           ls -la site
 
       - name: 部署到 Cloudflare Pages
