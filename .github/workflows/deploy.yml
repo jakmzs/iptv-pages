@@ -1,0 +1,59 @@
+name: IPTV 更新并部署到 Cloudflare Pages
+
+on:
+  schedule:
+    - cron: "0 */12 * * *"      # 每 12 小时自动更新一次（与 NAS 方案同频）
+  workflow_dispatch:            # 也可在 Actions 页面手动触发一次
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iptv-cf-pages
+  cancel-in-progress: false
+
+env:
+  IMAGE: guovern/iptv-api:latest
+
+jobs:
+  update-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - name: 检出本仓库（含 config/）
+        uses: actions/checkout@v6
+
+      - name: 启动 iptv-api（Docker）并等待首次更新完成
+        run: |
+          mkdir -p output
+          docker run -d --name iptv \
+            -v "${{ github.workspace }}/config:/iptv-api/config" \
+            -v "${{ github.workspace }}/output:/iptv-api/output" \
+            $IMAGE
+          echo "等待引擎抓取 + 测速 + 生成结果（最多 30 分钟）..."
+          for i in $(seq 1 120); do
+            if docker logs iptv 2>&1 | grep -qiE "更新完成|更新失败"; then break; fi
+            sleep 15
+          done
+          docker logs iptv 2>&1 | tail -25
+
+      - name: 停止容器（结果已写入 output/）
+        if: always()
+        run: docker stop iptv || true
+
+      - name: 准备站点目录
+        run: |
+          mkdir -p site
+          cp output/result.m3u site/ 2>/dev/null || true
+          cp output/result.txt site/ 2>/dev/null || true
+          cp output/epg.xml  site/ 2>/dev/null || true
+          ls -la site
+
+      - name: 部署到 Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: jakmz-iptv
+          directory: site
+          branch: main
