@@ -30,6 +30,7 @@ except Exception as e:
     raise SystemExit(0)
 
 cur = ""
+skip_group = False
 out = ["#EXTM3U"]
 for ln in lines:
     s = ln.strip()
@@ -37,8 +38,15 @@ for ln in lines:
         continue
     if ",#genre#" in s:
         g = s.split(",#genre#")[0].strip()
-        # 「更新时间」组里夹带了一条无关视频，直接跳过该组
-        cur = "" if g in ("🕘️更新时间", "更新时间") else g
+        # 「更新时间」组夹带无关视频/时间戳，整组跳过
+        if g in ("🕘️更新时间", "更新时间"):
+            cur = ""
+            skip_group = True
+        else:
+            cur = g
+            skip_group = False
+        continue
+    if skip_group:
         continue
     if "," in s:
         name, url = s.split(",", 1)
