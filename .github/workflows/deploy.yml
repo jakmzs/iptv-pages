@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: iptv-cf-pages
@@ -21,7 +22,7 @@ jobs:
     timeout-minutes: 300
     steps:
       - name: 检出本仓库（含 config/）
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: 启动 iptv-api（Docker）并等待首次更新完成
         run: |
