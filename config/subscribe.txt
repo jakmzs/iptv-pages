@@ -1,0 +1,19 @@
+# IPTV-API 订阅源（一行一个，支持 m3u / txt）
+# 说明：以下均为公开的一般性国内直播源（央视/卫视/港澳台/电影/体育等），
+# 不含成人内容源。最终输出还会经过 demo.txt 频道模板"对频道"匹配——
+# 模板里没列的频道（包括任何成人台）在匹配阶段即被丢弃，不会进入结果。
+# 若需增减源，改本文件后重启容器生效。
+
+# fanmingming/live（通用，含 IPv4/IPv6）
+https://live.fanmingming.com/tv/m3u/ipv4.m3u
+https://live.fanmingming.com/tv/m3u/ipv6.m3u
+
+# YueChan/Live 主列表（通用，Adult 为独立文件不在此列）
+https://raw.githubusercontent.com/YueChan/Live/main/IPTV.m3u
+
+# zbds.top 聚合（IPv4/IPv6）
+https://live.zbds.top/tv/iptv4.m3u
+https://live.zbds.top/tv/iptv6.m3u
+
+# vbskycn/iptv（IPv6 为主）
+https://raw.githubusercontent.com/vbskycn/iptv/refs/heads/master/tv/iptv6.m3u
